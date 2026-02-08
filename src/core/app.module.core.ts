@@ -15,7 +15,6 @@ import { ServerController } from '@waha/api/server.controller';
 import { ServerDebugController } from '@waha/api/server.debug.controller';
 import { WebsocketGatewayCore } from '@waha/api/websocket.gateway.core';
 import { AppsModuleExports } from '@waha/apps/apps.module';
-import { ContactsSessionController } from '@waha/api/contacts.session.controller';
 import { ApiKeyStrategy } from '@waha/core/auth/apiKey.strategy';
 import { IApiKeyAuth } from '@waha/core/auth/auth';
 import { ApiKeyAuthMiddleware } from '@waha/core/auth/api-key-auth.middleware';
@@ -41,15 +40,12 @@ import { join } from 'path';
 import { Logger } from 'pino';
 
 import { AuthController } from '../api/auth.controller';
-import { CallsController } from '../api/calls.controller';
 import { ChatsController } from '../api/chats.controller';
 import { ChattingController } from '../api/chatting.controller';
 import { ContactsController } from '../api/contacts.controller';
-import { EventsController } from '../api/events.controller';
 import { GroupsController } from '../api/groups.controller';
 import { HealthController } from '../api/health.controller';
 import { LabelsController } from '../api/labels.controller';
-import { MediaController } from '../api/media.controller';
 import { PingController } from '../api/ping.controller';
 import { PresenceController } from '../api/presence.controller';
 import { ScreenshotController } from '../api/screenshot.controller';
@@ -149,23 +145,19 @@ export const CONTROLLERS = [
   ProfileController,
   ChattingController,
   ChatsController,
-  CallsController,
   ChannelsController,
   StatusController,
   LabelsController,
   ContactsController,
-  ContactsSessionController,
   LidsController,
   GroupsController,
   PresenceController,
   ScreenshotController,
-  EventsController,
   PingController,
   HealthController,
   ServerController,
   ServerDebugController,
   VersionController,
-  MediaController,
   ...AppsModuleExports.controllers,
 ];
 export const PROVIDERS_BASE: Provider[] = [

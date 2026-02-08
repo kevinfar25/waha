@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -28,9 +27,7 @@ import {
   ChannelSearchByText,
   ChannelSearchByView,
   ChannelView,
-  CreateChannelRequest,
   ListChannelsQuery,
-  NewsletterIdApiParam,
   NewsletterIdOrInviteCodeApiParam,
   PreviewChannelMessages,
 } from '@waha/structures/channels.dto';
@@ -65,27 +62,6 @@ export class ChannelsController {
     @Query() query: ListChannelsQuery,
   ): Promise<Channel[]> {
     return session.channelsList(query);
-  }
-
-  @Post('')
-  @SessionApiParam
-  @ApiOperation({ summary: 'Create a new channel.' })
-  create(
-    @WorkingSessionParam session: WhatsappSession,
-    @Body() request: CreateChannelRequest,
-  ): Promise<Channel> {
-    return session.channelsCreateChannel(request);
-  }
-
-  @Delete(':id')
-  @SessionApiParam
-  @NewsletterIdApiParam
-  @ApiOperation({ summary: 'Delete the channel.' })
-  delete(
-    @WorkingSessionParam session: WhatsappSession,
-    @Param('id') id: string,
-  ) {
-    return session.channelsDeleteChannel(id);
   }
 
   @Get(':id')
@@ -140,50 +116,6 @@ export class ChannelsController {
     }
     const inviteCode = parseChannelInviteLink(code);
     return session.previewChannelMessages(inviteCode, query);
-  }
-
-  @Post(':id/follow')
-  @SessionApiParam
-  @NewsletterIdApiParam
-  @ApiOperation({ summary: 'Follow the channel.' })
-  follow(
-    @WorkingSessionParam session: WhatsappSession,
-    @Param('id') id: string,
-  ): Promise<void> {
-    return session.channelsFollowChannel(id);
-  }
-
-  @Post(':id/unfollow')
-  @SessionApiParam
-  @NewsletterIdApiParam
-  @ApiOperation({ summary: 'Unfollow the channel.' })
-  unfollow(
-    @WorkingSessionParam session: WhatsappSession,
-    @Param('id') id: string,
-  ): Promise<void> {
-    return session.channelsUnfollowChannel(id);
-  }
-
-  @Post(':id/mute')
-  @SessionApiParam
-  @NewsletterIdApiParam
-  @ApiOperation({ summary: 'Mute the channel.' })
-  mute(
-    @WorkingSessionParam session: WhatsappSession,
-    @Param('id') id: string,
-  ): Promise<void> {
-    return session.channelsMuteChannel(id);
-  }
-
-  @Post(':id/unmute')
-  @SessionApiParam
-  @NewsletterIdApiParam
-  @ApiOperation({ summary: 'Unmute the channel.' })
-  unmute(
-    @WorkingSessionParam session: WhatsappSession,
-    @Param('id') id: string,
-  ): Promise<void> {
-    return session.channelsUnmuteChannel(id);
   }
 
   @Post('/search/by-view')

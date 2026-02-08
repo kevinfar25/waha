@@ -1,8 +1,6 @@
 import {
-  Body,
   Controller,
   Get,
-  Post,
   Query,
   UseGuards,
   UsePipes,
@@ -19,12 +17,11 @@ import {
 import {
   ContactProfilePictureQuery,
   ContactQuery,
-  ContactRequest,
   ContactsPaginationParams,
 } from '../structures/contacts.dto';
 import { PoliciesGuard } from '@waha/core/auth/policies.guard';
 import { CheckPolicies } from '@waha/core/auth/policies.decorator';
-import { CanSession, FromBody, FromQuery } from '@waha/core/auth/policies';
+import { CanSession, FromQuery } from '@waha/core/auth/policies';
 
 import { Action } from '@waha/core/auth/casl.types';
 
@@ -96,21 +93,5 @@ export class ContactsController {
       query.refresh,
     );
     return { profilePictureURL: url };
-  }
-
-  @Post('/block')
-  @ApiOperation({ summary: 'Block contact' })
-  @CheckPolicies(CanSession(Action.Use, FromBody('session')))
-  async block(@Body() request: ContactRequest) {
-    const whatsapp = await this.manager.getWorkingSession(request.session);
-    return whatsapp.blockContact(request);
-  }
-
-  @Post('/unblock')
-  @ApiOperation({ summary: 'Unblock contact' })
-  @CheckPolicies(CanSession(Action.Use, FromBody('session')))
-  async unblock(@Body() request: ContactRequest) {
-    const whatsapp = await this.manager.getWorkingSession(request.session);
-    return whatsapp.unblockContact(request);
   }
 }

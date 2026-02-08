@@ -1,14 +1,10 @@
 import * as process from 'node:process';
 
 import {
-  Body,
   Controller,
   Get,
-  Logger,
-  Post,
   Query,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { WhatsappConfigService } from '@waha/config.service';
@@ -17,10 +13,7 @@ import { WAHAEnvironment } from '@waha/structures/environment.dto';
 import {
   EnvironmentQuery,
   ServerStatusResponse,
-  StopRequest,
-  StopResponse,
 } from '@waha/structures/server.dto';
-import { sleep } from '@waha/utils/promiseTimeout';
 import { VERSION } from '@waha/version';
 import * as lodash from 'lodash';
 import { PoliciesGuard } from '@waha/core/auth/policies.guard';
@@ -34,11 +27,7 @@ import { Action } from '@waha/core/auth/casl.types';
 @ApiTags('🔍 Observability')
 @UseGuards(PoliciesGuard)
 export class ServerController {
-  private logger: Logger;
-
-  constructor(private config: WhatsappConfigService) {
-    this.logger = new Logger('ServerController');
-  }
+  constructor(private config: WhatsappConfigService) {}
 
   @Get('version')
   @ApiOperation({ summary: 'Get the version of the server' })
@@ -88,35 +77,5 @@ export class ServerController {
         id: this.config.workerId,
       },
     };
-  }
-
-  @Post('stop')
-  @ApiOperation({
-    summary: 'Stop (and restart) the server',
-    description:
-      "If you're using docker, after calling this endpoint Docker will start a new container, " +
-      'so you can use this endpoint to restart the server',
-  })
-  @CheckPolicies(CanServer(Action.Manage))
-  @UsePipes(new WAHAValidationPipe())
-  async stop(@Body() request: StopRequest): Promise<StopResponse> {
-    const timeout = 1_000;
-    if (request.force) {
-      this.logger.log(`Force stopping the server in ${timeout}ms`);
-      setTimeout(() => {
-        this.logger.log('Force stopping the server');
-        process.kill(process.pid, 'SIGKILL');
-        process.exit(0);
-      }, timeout);
-    } else {
-      this.logger.log(`Gracefully stopping the server in ${timeout}ms`);
-      setTimeout(async () => {
-        this.logger.log('Gracefully closing the application...');
-        process.kill(process.pid, 'SIGTERM');
-        await sleep(10_000);
-        process.exit(0);
-      }, timeout);
-    }
-    return { stopping: true };
   }
 }

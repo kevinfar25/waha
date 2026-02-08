@@ -1,6 +1,4 @@
 import {
-  BadRequestException,
-  Body,
   Controller,
   Get,
   Param,
@@ -16,10 +14,8 @@ import {
 
 import { SessionManager } from '../core/abc/manager.abc';
 import { WhatsappSession } from '../core/abc/session.abc';
-import { WAHAPresenceStatus } from '../structures/enums.dto';
 import {
   WAHAChatPresences,
-  WAHASessionPresence,
 } from '../structures/presence.dto';
 import { PoliciesGuard } from '@waha/core/auth/policies.guard';
 import { CheckPolicies } from '@waha/core/auth/policies.decorator';
@@ -34,36 +30,6 @@ import { Action } from '@waha/core/auth/casl.types';
 @CheckPolicies(CanSession(Action.Use, FromParam('session')))
 export class PresenceController {
   constructor(private manager: SessionManager) {}
-
-  @Post('')
-  @SessionApiParam
-  @ApiOperation({ summary: 'Set session presence' })
-  setPresence(
-    @WorkingSessionParam session: WhatsappSession,
-    @Body() request: WAHASessionPresence,
-  ) {
-    // Validate request
-    const presencesWithoutChatId = [
-      WAHAPresenceStatus.ONLINE,
-      WAHAPresenceStatus.OFFLINE,
-    ];
-    const requiresNoChatId = presencesWithoutChatId.includes(request.presence);
-    const requiresChatId = !requiresNoChatId;
-
-    if (requiresNoChatId && request.chatId) {
-      const msg = {
-        detail: `'${request.presence}' presence works on the global scope and doesn't require 'chatId' field.`,
-      };
-      throw new BadRequestException(msg);
-    } else if (requiresChatId && !request.chatId) {
-      const msg = {
-        detail: `'${request.presence}' presence requires 'chatId' field.`,
-      };
-      throw new BadRequestException(msg);
-    }
-
-    return session.setPresence(request.presence, request.chatId);
-  }
 
   @Get('')
   @SessionApiParam

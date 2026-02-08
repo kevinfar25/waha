@@ -1,13 +1,11 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Inject,
   NotFoundException,
   Param,
   Post,
-  Put,
   Query,
   Req,
   UseGuards,
@@ -47,7 +45,6 @@ import {
   SessionExpand,
   SessionInfo,
   SessionInfoQuery,
-  SessionUpdateRequest,
 } from '../structures/sessions.dto';
 import { SessionExamples } from './sessions.examples';
 import { FilterSessions } from '../core/auth/casl.ability';
@@ -155,64 +152,6 @@ class SessionsController {
       session.apps = await this.appsService.list(this.manager, name);
     }
     return session;
-  }
-
-  @Put(':session')
-  @ApiOperation({
-    summary: 'Update a session',
-    description: '',
-  })
-  @SessionApiParam
-  @ApiBody({ type: SessionUpdateRequest, examples: SessionExamples })
-  @CheckPolicies(CanSession(Action.Use, FromParam('session')))
-  @UsePipes(new WAHAValidationPipe({ forbidNonWhitelisted: false }))
-  async update(
-    @Param('session') name: string,
-    @Body() request: SessionUpdateRequest,
-  ): Promise<SessionDTO> {
-    await this.withLock(name, async () => {
-      if (!(await this.manager.exists(name))) {
-        throw new NotFoundException('Session not found');
-      }
-      const config = request.config;
-      const isRunning = this.manager.isRunning(name);
-      await this.manager.stop(name, true);
-      await this.manager.upsert(name, config);
-      if (request.apps) {
-        await this.appsService.syncSessionApps(
-          this.manager,
-          name,
-          request.apps,
-        );
-      }
-      if (isRunning) {
-        await this.manager.start(name);
-      }
-    });
-    const session = await this.manager.getSessionInfo(name);
-    if (request.apps) {
-      session.apps = await this.appsService.list(this.manager, name);
-    }
-    return session;
-  }
-
-  @Delete(':session')
-  @SessionApiParam
-  @ApiOperation({
-    summary: 'Delete the session',
-    description:
-      'Delete the session with the given name. Stop and logout as well. Idempotent operation.',
-  })
-  @CheckPolicies(CanSession(Action.Delete, FromParam('session')))
-  @UsePipes(new WAHAValidationPipe())
-  async delete(@Param('session') name: string): Promise<void> {
-    await this.withLock(name, async () => {
-      await this.manager.unassign(name);
-      await this.manager.unpair(name);
-      await this.manager.stop(name, true);
-      await this.manager.logout(name);
-      await this.manager.delete(name);
-    });
   }
 
   @Post(':session/start')
